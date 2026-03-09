@@ -14,6 +14,8 @@
 
 body {
   min-height: 100vh;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
@@ -23,4 +25,17 @@ a {
 
 .nav-link:hover {
   background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Layout responsiveness */
+@media (max-width: 768px) {
+  body {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 14px;
+  }
 }

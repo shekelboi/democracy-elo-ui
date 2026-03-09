@@ -4,7 +4,7 @@ This API exposes a simple ELO-based rating system for countries, backed by SQLit
 
 - **App module**: `main.py`
 - **Framework**: FastAPI
-- **Database**: SQLite (`db/countries.sqlite`, table `country`)
+- **Database**: SQLite (`db/countries.sqlite`, tables `country` and `match`)
 - **Typical local base URL**: `http://localhost:8000`
 
 ### Data model: `Country`
@@ -22,6 +22,26 @@ All endpoints return plain model objects; in JSON, a `Country` looks like:
   "id": "USA",
   "name": "United States",
   "elo": 1532.4
+}
+```
+
+### Data model: `Match`
+
+Each vote is stored in the `match` table with:
+
+- **id** (`INTEGER`, primary key, auto-increment): Unique match identifier.
+- **ip** (`STRING`): IP address of the user who voted.
+- **countries** (`STRING`): The pair of countries in the format `COUNTRY1-COUNTRY2` (in alphabetical order by ID).
+- **winner** (`STRING`): The ID of the winning country.
+
+In JSON, a `Match` looks like:
+
+```json
+{
+  "id": 1,
+  "ip": "127.0.0.1",
+  "countries": "FRA-USA",
+  "winner": "USA"
 }
 ```
 
@@ -87,6 +107,39 @@ GET /random_pair HTTP/1.1
 Host: localhost:8000
 ```
 
+### GET `/my_votes`
+
+- **Description**: Returns all votes cast by the current user (identified by IP address).
+- **Method**: `GET`
+- **Query params**: None
+- **Response**: `200 OK` with a JSON array of `Match` objects.
+
+Example:
+
+```http
+GET /my_votes HTTP/1.1
+Host: localhost:8000
+```
+
+Response body:
+
+```json
+[
+  {
+    "id": 1,
+    "ip": "127.0.0.1",
+    "countries": "FRA-USA",
+    "winner": "USA"
+  },
+  {
+    "id": 2,
+    "ip": "127.0.0.1",
+    "countries": "CAN-GBR",
+    "winner": "GBR"
+  }
+]
+```
+
 ### POST/GET `/select_winner`
 
 Registers the outcome of a "match" between two countries and updates their ELO scores using the `calculate_elo` function in `main.py`.
@@ -97,13 +150,17 @@ Registers the outcome of a "match" between two countries and updates their ELO s
   - **country2_id** (`string`, required): ID of the second country (winner if `winner=false`).
   - **winner** (`bool`, required): `true` if `country1` wins, `false` if `country2` wins.
 - **Behavior**:
-  - Looks up both countries (IDs uppercased).
+  - Uppercases and sorts country IDs alphabetically for consistency.
+  - Returns `{"change": 0}` silently if the current user (identified by IP) has already voted on this country pair.
+  - Looks up both countries in the database.
   - Computes the ELO change based on their current `elo` values and the `winner` flag.
-  - Increases the winner's `elo` and decreases the loser's `elo` by the same amount.
+  - Increases the winner's `elo` and decreases the loser's `elo` by the same amount (rounded to 4 decimal places).
+  - Records the vote in the `match` table.
   - Commits the changes to the database.
 - **Responses**:
-  - `200 OK` with `{"change": <float>}` — the signed rating change added to `country1` and subtracted from `country2`.
+  - `200 OK` with `{"change": <float>}` — the signed rating change added to `country1` and subtracted from `country2`. Returns `0` if this IP has already voted on this pair.
   - `400 Bad Request` with `{"error": "Country not found"}` if either ID is invalid.
+  - `400 Bad Request` with `{"error": "Cannot compete a country against itself."}` if both countries are the same.
 
 Example (GET):
 
@@ -128,4 +185,3 @@ The ELO change uses:
 - **Meaning of `change`**:
   - Add `change` to `country1.elo`.
   - Subtract the same amount (rounded in storage) from `country2.elo`.
-

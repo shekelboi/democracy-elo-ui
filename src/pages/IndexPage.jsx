@@ -8,6 +8,7 @@ export default function IndexPage() {
   const [error, setError] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [hovered, setHovered] = useState(null)
+  const [isMobile, setIsMobile] = useState(false)
 
   const loadPair = useCallback(async () => {
     setLoading(true)
@@ -25,6 +26,17 @@ export default function IndexPage() {
   useEffect(() => {
     loadPair()
   }, [loadPair])
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        setIsMobile(window.innerWidth <= 768)
+      }
+    }
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const handleVote = async (winnerCountry) => {
     if (!pair || pair.length !== 2 || submitting) return
@@ -76,7 +88,12 @@ export default function IndexPage() {
   return (
     <div style={styles.wrapper}>
       <h1 style={styles.title}>Which country is more democratic?</h1>
-      <div style={styles.flagsRow}>
+      <div
+        style={{
+          ...styles.flagsRow,
+          flexDirection: isMobile ? 'column' : 'row',
+        }}
+      >
         <FlagCard
           country={country1}
           isHovered={hovered === country1.id}
@@ -85,7 +102,15 @@ export default function IndexPage() {
           onClick={() => handleVote(country1)}
           disabled={submitting}
         />
-        <span style={styles.vs}>vs</span>
+        <span
+          style={{
+            ...styles.vs,
+            fontSize: isMobile ? '1.7rem' : '1.5rem',
+            margin: isMobile ? '0.75rem 0' : '0 1rem',
+          }}
+        >
+          vs
+        </span>
         <FlagCard
           country={country2}
           isHovered={hovered === country2.id}
@@ -137,11 +162,12 @@ function FlagCard({ country, isHovered, onHover, onLeave, onClick, disabled }) {
 
 const styles = {
   wrapper: {
-    maxWidth: 800,
+    maxWidth: 900,
     margin: '0 auto',
     textAlign: 'center',
     position: 'relative',
     minHeight: 400,
+    paddingBottom: '3rem',
   },
   center: {
     display: 'flex',
@@ -152,16 +178,17 @@ const styles = {
     gap: '1rem',
   },
   title: {
-    fontSize: '1.5rem',
-    marginBottom: '2rem',
+    fontSize: '1.6rem',
+    marginBottom: '1.75rem',
     color: '#1a1a2e',
     fontWeight: 600,
+    padding: '0 0.5rem',
   },
   flagsRow: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '2rem',
+    gap: '1.5rem',
     flexWrap: 'wrap',
     marginBottom: '2rem',
   },
@@ -169,15 +196,17 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    padding: '1.5rem',
+    padding: '1.25rem',
     borderRadius: '12px',
     backgroundColor: '#fff',
     boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
     transition: 'transform 0.2s ease, box-shadow 0.2s ease',
   },
   flagImg: {
-    width: 160,
-    height: 120,
+    width: '38vw',
+    maxWidth: 260,
+    minWidth: 140,
+    height: 'auto',
     objectFit: 'cover',
     borderRadius: '8px',
     marginBottom: '0.75rem',
@@ -188,15 +217,16 @@ const styles = {
     color: '#333',
   },
   vs: {
-    fontSize: '1.25rem',
-    fontWeight: 600,
-    color: '#666',
+    fontSize: '1.5rem',
+    fontWeight: 700,
+    color: '#444',
+    alignSelf: 'center',
   },
   skip: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    padding: '0.5rem 1rem',
+    position: 'fixed',
+    right: '1rem',
+    bottom: '1rem',
+    padding: '0.55rem 1.1rem',
     backgroundColor: 'transparent',
     border: '1px solid #ccc',
     borderRadius: '6px',

@@ -122,8 +122,9 @@ export default function StatisticsPage() {
 
 const styles = {
   wrapper: {
-    maxWidth: 700,
+    maxWidth: 900,
     margin: '0 auto',
+    paddingBottom: '1rem',
   },
   center: {
     display: 'flex',
@@ -133,14 +134,14 @@ const styles = {
     minHeight: 200,
   },
   title: {
-    fontSize: '1.5rem',
+    fontSize: '1.6rem',
     marginBottom: '1rem',
     color: '#1a1a2e',
     fontWeight: 600,
   },
   search: {
     width: '100%',
-    padding: '0.75rem 1rem',
+    padding: '0.7rem 0.9rem',
     marginBottom: '1rem',
     border: '1px solid #ddd',
     borderRadius: '8px',
