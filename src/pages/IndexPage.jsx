@@ -105,8 +105,8 @@ export default function IndexPage() {
         <span
           style={{
             ...styles.vs,
-            fontSize: isMobile ? '1.7rem' : '1.5rem',
-            margin: isMobile ? '0.75rem 0' : '0 1rem',
+            fontSize: isMobile ? '2.4rem' : '2rem',
+            margin: isMobile ? '0.9rem 0' : '0 1.5rem',
           }}
         >
           vs
@@ -196,20 +196,21 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    padding: '1.25rem',
+    padding: '1.5rem',
     borderRadius: '12px',
     backgroundColor: '#fff',
     boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
     transition: 'transform 0.2s ease, box-shadow 0.2s ease',
   },
   flagImg: {
-    width: '38vw',
-    maxWidth: 260,
-    minWidth: 140,
+    width: '45vw',
+    maxWidth: 320,
+    minWidth: 160,
     height: 'auto',
     objectFit: 'cover',
     borderRadius: '8px',
     marginBottom: '0.75rem',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
   },
   countryName: {
     fontSize: '1rem',
